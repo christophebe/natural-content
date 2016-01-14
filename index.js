@@ -43,10 +43,10 @@ function getWords (text, withStopWords) {
                       .split(WORD_SEPARATOR);
 
   if (withStopWords) {
-      return _.filter(words, function(word){return (word !== ''); });
+      return _.filter(words, function(word){return (word !== '') && ! _.isNumber(word); });
   }
   else {
-      return _.filter(words, function(word){return (word !== '' && stopwords.indexOf(word) === -1); });
+      return _.filter(words, function(word){return (word !== '' && ! _.isNumber(word) && stopwords.indexOf(word) === -1); });
   }
 
 }
@@ -83,7 +83,7 @@ function getWords (text, withStopWords) {
  *        max   : the value of the most frequent word
  *    }
  */
-function getTf(words, n, nbrDocs) {
+function getTf(words, n, stats) {
 
     var ws = words;
     if (n && n > 1) {
@@ -93,10 +93,24 @@ function getTf(words, n, nbrDocs) {
     var max = _.max(count);
     var tfs = {};
 
-    _.keys(count).forEach(function(key) {
-        tfs[key] = count[key]/max;
-        if (nbrDocs) {
-          nbrDocs[key] = nbrDocs[key] ? ++nbrDocs[key] : 1;
+    _.keys(count).forEach(function(word) {
+
+        // Calculate the tf for this word
+        tfs[word] = count[word]/max;
+
+        // Update stats
+        if (stats) {
+            // update the number of documents for this word
+            stats.nbrDocsByWords[word] = stats.nbrDocsByWords[word] ? ++stats.nbrDocsByWords[word] : 1;
+
+            // Calculate sum & register the tf for min & max computation
+            if (stats.words[word]) {
+              stats.words[word].tfs.push(tfs[word]);
+              stats.words[word].tfSum += tfs[word];
+            }
+            else {
+              stats.words[word] = initWordStat(tfs[word]);
+            }
         }
 
     });
@@ -109,35 +123,52 @@ function getTf(words, n, nbrDocs) {
 
 }
 
+
 /**
  * Get the tfIdf for each word of a document
  *
  *
  * @param the document represented by an term frequency array.
- *        the function getTf can be used for generating the term frequency array 
+ *        the function getTf can be used for generating the term frequency array
  * @param the number of document per word (index = word)
  * @param the number of documents
  * @param the stats about the words for the full set of documents
  * @return
  */
-function geTfIdf(document, nbrDocsByWords, nbrDocs, stats) {
+function geTfIdf(document, nbrDocs, stats) {
 
 
     var tfIdf = {};
-    _.keys(document.tfs).forEach(function(word){
-        tfIdf[word] = document.tfs[word] * (Math.log(nbrDocs/nbrDocsByWords[word]) + 1);
-        if (stats[word]) {
-          stats[word].min = _.min([tfIdf[word], stats[word].min]);
-          stats[word].max = _.max([tfIdf[word], stats[word].max]);
-          stats[word].sum +=  tfIdf[word];
-        }
-        else {
-          stats[word] = { min : tfIdf[word], max : tfIdf[word], sum : tfIdf[word] };
+    _.keys(document.tfs).forEach(function(word) {
+        var idf = Math.log(nbrDocs/stats.nbrDocsByWords[word]) + 1;
+        tfIdf[word] = document.tfs[word] * idf;
+
+        if (stats.words[word]) {
+          stats.words[word].tfIdfs.push(tfIdf[word]);
+          stats.words[word].tfIdfSum += tfIdf[word];
+          stats.words[word].idfs.push(idf);
+          stats.words[word].idfSum += idf;
         }
     });
 
     document.tfIdf = tfIdf;
     return document;
+}
+
+function initWordStat(tf) {
+
+    return {
+      tfSum : tf,
+      tfs : [tf],
+
+      idfSum : 0,
+      idfs : [],
+
+      tfIdfSum : 0,
+      tfIdfs : []
+
+    };
+
 }
 
 /**
@@ -150,34 +181,42 @@ function geTfIdf(document, nbrDocsByWords, nbrDocs, stats) {
 function getTfIdfs(documents, n, withStopWords) {
 
     var result = {};
-    var nbrDocsByWords = {};
-    var stats = {};
+    var stats = createEmptyStat();
 
     // Calculate the TF of each words for each docs
-    var tfs = _.map(documents, function(content){ return getTf(getWords(content, withStopWords), n, nbrDocsByWords);});
+    var tfs = _.map(documents, function(document){ return getTf(getWords(document, withStopWords), n, stats);});
 
-    // Calculate the tf.idf for each each docs & produce stat per word
-    var data = _.map(tfs, function(docTfs) {return geTfIdf(docTfs, nbrDocsByWords, documents.length, stats );});
+    // Calculate the tf.idf for each each docs & produce stats per word
+    var data = _.map(tfs, function(docTfs) { return geTfIdf(docTfs, documents.length, stats );});
 
-    // Calculate the average tf.idf for each word
-    stats = _.mapObject(stats, function(val, key) {
-        val.avg = val.sum/nbrDocsByWords[key];
-        return val;
+    // Calculate min, max, avg for tf, idf & tf.idf
+    stats.words = _.mapObject(stats.words, function(word, key){
+        word.tfMin = _.min(word.tfs);
+        word.tfMax = _.max(word.tfs);
+        word.tfAvg = word.tfSum / stats.nbrDocsByWords[key];
+
+        word.idfMax = _.max(word.idfs);
+        word.idfAvg = word.idfSum / stats.nbrDocsByWords[key];
+
+        word.tfIdfMin = _.min(word.tfIdfs);
+        word.tfIdfMax = _.max(word.tfIdfs);
+        word.tfIdfAvg = word.tfIdfSum / stats.nbrDocsByWords[key];
+        return word;
     });
 
     result.documents = data;
     result.numberOfDocs = documents.length;
     result.stats = stats;
-    result.nbrDocsByWords = nbrDocsByWords;
 
     return result;
 }
 
-
-/*
-  tf = nombre occurence du terme/ nombre d'occurence du terme le plus fréquent
-  idf = log(nbr doc/nbr doc ayant le terme) + 1
-*/
+function createEmptyStat() {
+     return {
+       nbrDocsByWords : [],
+       words : []
+     };
+}
 
 exports.getStatements = getStatements;
 exports.getWords = getWords;

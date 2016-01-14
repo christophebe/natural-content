@@ -1,15 +1,16 @@
 var assert     = require("assert");
+var _          = require("underscore");
 var natural    = require("../index.js");
 
 
 describe("Natural Content", function() {
         var documents = [
-            "word1 word2 word3 word4 word5 word6. word7 word1 word8 word9 word10 word11 word6. word1 word12 word13. word1 word1",
-            "word2 word7 word8 word9 word10 word11.",
+            "word1 word2 word3 word4 word5 word6. word7 word1 word8 word9 word10 word11 word6. word1 word12 word13. word1 word1 ",
+            "word2 word7 word8 word9 word10 word7 word11 word7 word11 word11 word11 word11.",
             " word7 word2"  ];
 
         it('Statements', function() {
-              var stats = natural.getStatements("word1 word2 word3 word4 word5 word6. word7 word1 word8 word9 word10 word11 word6. word1 word12 word13");
+              var stats = natural.getStatements("word1 word2 word3 word4 :word5 word6. word7 word1, word8 word9 word10 word11 word6. word1 word12 word13");
               assert(stats.length === 3);
 
         });
@@ -54,8 +55,16 @@ describe("Natural Content", function() {
 
         it("tf.idf for a set of document ", function(){
 
-            var info = natural.getTfIdfs(documents, 1, false); 
-            console.log(info);
+            var info = natural.getTfIdfs(documents, 1, false);
+            //console.log(info);
+            //console.log(info.stats.words['word7']);
+            console.log("Word,TF Avg,TF Min,TF Max,IDF Avg,TF.IDF Sum,TF.IDF Avg");
+            _.keys(info.stats.words).forEach(function(word) {
+              //console.log(">> ", info.stats.words[word]);
+              console.log(word + "," + info.stats.words[word].tfAvg + "," + info.stats.words[word].tfMin + "," + info.stats.words[word].tfMax + "," +
+                          info.stats.words[word].idfAvg  + ',' + info.stats.words[word].tfIdfSum + ',' + info.stats.words[word].tfIdfAvg);
+            });
+
         });
 
         //geTfId(document, nbrDocsByWords, nbrDocs, stats)
