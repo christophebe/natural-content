@@ -7,7 +7,7 @@ describe("Natural Content", function() {
         var documents = [
             "word1 word2 word3 word4 word5 word6. word7 word1 word8 word9 word10 word11 word6. word1 word12 word13. word1 word1 ",
             "word2 word7 word8 word9 word10 word7 word11 word7 word11 word11 word11 word11.",
-            " word7 word2"  ];
+            " word7 word2 "  ];
 
         it('Statements', function() {
               var stats = natural.getStatements("word1 word2 word3 word4 :word5 word6. word7 word1, word8 word9 word10 word11 word6. word1 word12 word13");
@@ -21,6 +21,11 @@ describe("Natural Content", function() {
           assert(words.length === 8);
 
           words = natural.getWords("word1 word2 word3 word4. le la sur word5", false);
+          console.log("words", words);
+          assert(words.length === 5);
+
+          words = natural.getWords("word1 word2 word3 1234 word4 156,78. le la sur word5", false);
+          console.log(words);
           assert(words.length === 5);
 
         });

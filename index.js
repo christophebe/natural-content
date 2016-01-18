@@ -1,4 +1,5 @@
 var _         = require('underscore');
+
 var stopwords = require("./lib/stopwords").stopwords;
 
 var WORD_SEPARATOR = " ";
@@ -42,11 +43,12 @@ function getWords (text, withStopWords) {
                       .toLowerCase()
                       .split(WORD_SEPARATOR);
 
+  // Remove numbers, empty string & stopwords
   if (withStopWords) {
-      return _.filter(words, function(word){return (word !== '') && ! _.isNumber(word); });
+      return _.filter(words, function(word){return (word !== '') &&  isNaN(word); });
   }
   else {
-      return _.filter(words, function(word){return (word !== '' && ! _.isNumber(word) && stopwords.indexOf(word) === -1); });
+      return _.filter(words, function(word){return (word !== '' && isNaN(word) && stopwords.indexOf(word) === -1); });
   }
 
 }
@@ -213,7 +215,7 @@ function getTfIdfs(documents, n, withStopWords) {
 
 function createEmptyStat() {
      return {
-       nbrDocsByWords : [],
+       nbrDocsByWords : {},
        words : []
      };
 }
