@@ -1,6 +1,6 @@
 {
   "name": "natural-content",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A set of natural functions like tf.idf, extract words & n-grams, ... (experimental project)",
   "main": "index.js",
   "scripts": {

@@ -106,7 +106,7 @@ function getTf(words, n, stats) {
             stats.nbrDocsByWords[word] = stats.nbrDocsByWords[word] ? ++stats.nbrDocsByWords[word] : 1;
 
             // Calculate sum & register the tf for min & max computation
-            if (stats.words[word]) {
+            if (stats.words[word] && stats.words[word].tfs) {
               stats.words[word].tfs.push(tfs[word]);
               stats.words[word].tfSum += tfs[word];
             }
@@ -145,7 +145,7 @@ function geTfIdf(document, nbrDocs, stats) {
         var idf = Math.log(nbrDocs/stats.nbrDocsByWords[word]) + 1;
         tfIdf[word] = document.tfs[word] * idf;
 
-        if (stats.words[word]) {
+        if (stats.words[word] && stats.words[word].tfIdfs && stats.words[word].idfs) {
           stats.words[word].tfIdfs.push(tfIdf[word]);
           stats.words[word].tfIdfSum += tfIdf[word];
           stats.words[word].idfs.push(idf);

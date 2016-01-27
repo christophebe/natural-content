@@ -21,11 +21,11 @@ describe("Natural Content", function() {
           assert(words.length === 8);
 
           words = natural.getWords("word1 word2 word3 word4. le la sur word5", false);
-          console.log("words", words);
+          //console.log("words", words);
           assert(words.length === 5);
 
           words = natural.getWords("word1 word2 word3 1234 word4 156,78. le la sur word5", false);
-          console.log(words);
+          //console.log(words);
           assert(words.length === 5);
 
         });
