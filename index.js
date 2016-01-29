@@ -103,18 +103,20 @@ function getTf(words, n, stats) {
 
         // Update stats
         if (stats) {
-            // update the number of documents for this word
-            stats.nbrDocsByWords[word] = stats.nbrDocsByWords[word] ? ++stats.nbrDocsByWords[word] : 1;
 
             // Calculate sum & register the tf for min & max computation
-            if (stats.words.has(word) && stats.words.get(word).tfs) {
-                var wordStat = stats.words.get(word);
+            if (stats.has(word) && stats.get(word).tfs) {
+                var wordStat = stats.get(word);
+                // update the number of documents for this word
+                wordStat.nbrDocsByWords++ ;
+
+                // Add the tf in the list of all tfs for this word
                 wordStat.tfs.push(tfs[word]);
                 wordStat.tfSum += tfs[word];
             }
             else {
                 var newWordStat = initWordStat(word, tfs[word]);
-                stats.words.set(word, newWordStat);
+                stats.set(word, newWordStat);
             }
         }
 
@@ -144,11 +146,11 @@ function geTfIdf(document, nbrDocs, stats) {
 
     var tfIdf = {};
     _.keys(document.tfs).forEach(function(word) {
-        var idf = Math.log(nbrDocs/stats.nbrDocsByWords[word]) + 1;
+        var idf = Math.log(nbrDocs/stats.get(word).nbrDocsByWords) + 1;
         tfIdf[word] = document.tfs[word] * idf;
 
-        if (stats.words.has(word) && stats.words.get(word).tfIdfs &&  stats.words.get(word).idfs) {
-            var wordStat = stats.words.get(word);
+        if (stats.has(word) && stats.get(word).tfIdfs &&  stats.get(word).idfs) {
+            var wordStat = stats.get(word);
 
             wordStat.tfIdfs.push(tfIdf[word]);
             wordStat.tfIdfSum += tfIdf[word];
@@ -173,7 +175,7 @@ function geTfIdf(document, nbrDocs, stats) {
 function getTfIdfs(documents, n, withStopWords, language) {
 
     var result = {};
-    var stats = createEmptyStat();
+    var stats = new Map();
 
     // Calculate the TF of each words for each docs
     var tfs = _.map(documents, function(document){ return getTf(getWords(document, withStopWords, language), n, stats);});
@@ -181,20 +183,19 @@ function getTfIdfs(documents, n, withStopWords, language) {
     // Calculate the tf.idf for each each docs & produce stats per word
     var data = _.map(tfs, function(docTfs) { return geTfIdf(docTfs, documents.length, stats );});
 
-
-    // Calculate min, max, avg for tf, idf & tf.idf
-    for (var wordStat of stats.words.values()) {
+    // Calculate stats : min, max, avg for tf, idf & tf.idf
+    for (var wordStat of stats.values()) {
 
         wordStat.tfMin = _.min(wordStat.tfs);
         wordStat.tfMax = _.max(wordStat.tfs);
-        wordStat.tfAvg = wordStat.tfSum / stats.nbrDocsByWords[wordStat.word];
+        wordStat.tfAvg = wordStat.tfSum / wordStat.nbrDocsByWords;
 
         wordStat.idfMax = _.max(wordStat.idfs);
-        wordStat.idfAvg = wordStat.idfSum / stats.nbrDocsByWords[wordStat.word];
+        wordStat.idfAvg = wordStat.idfSum / wordStat.nbrDocsByWords;
 
         wordStat.tfIdfMin = _.min(wordStat.tfIdfs);
         wordStat.tfIdfMax = _.max(wordStat.tfIdfs);
-        wordStat.tfIdfAvg = wordStat.tfIdfSum / stats.nbrDocsByWords[wordStat.word];
+        wordStat.tfIdfAvg = wordStat.tfIdfSum / wordStat.nbrDocsByWords;
 
     }
 
@@ -205,26 +206,16 @@ function getTfIdfs(documents, n, withStopWords, language) {
     return result;
 }
 
-/**
- *
- *  Create an empty stat data object
- *
- */
-function createEmptyStat() {
-     return {
-       nbrDocsByWords : {},
-       words : new Map()
-     };
-}
 
 /**
  *  Create an new Stat object for one word
  *
  */
-function initWordStat(word, tf) {
+function initWordStat(word,  tf) {
 
     return {
       word : word,
+      nbrDocsByWords : 1,
       tfSum : tf,
       tfs : [tf],
 

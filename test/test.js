@@ -58,13 +58,13 @@ describe("Natural Content", function() {
         });
 
 
-        it("tf.idf for a set of document ", function(){
+        it("tf.idf for a set of document ", function() {
 
             var info = natural.getTfIdfs(documents, 1, false, "fr");
-            console.log("Word,TF Avg,TF Min,TF Max,IDF Avg,TF.IDF Sum,TF.IDF Avg");
-
-            var sorted = _.sortBy(Array.from(info.stats.words.values()), function(word) { return -word.tfIdfSum;});
-            console.log(sorted);
+          
+            var sorted = _.sortBy(Array.from(info.stats.values()), function(word) { return -word.tfIdfSum;});
+            assert(sorted[0].word === "word1");
+            //console.log(sorted);
 
         });
 
