@@ -20,11 +20,11 @@ describe("Natural Content", function() {
           var words = natural.getWords("word1 word2 word3 word4. le la sur word5", true);
           assert(words.length === 8);
 
-          words = natural.getWords("word1 word2 word3 word4. le la sur word5", false);
+          words = natural.getWords("word1 word2 word3 word4. le la sur word5", false, "fr");
           //console.log("words", words);
           assert(words.length === 5);
 
-          words = natural.getWords("word1 word2 word3 1234 word4 156,78. le la sur word5", false);
+          words = natural.getWords("word1 word2 word3 1234 word4 156,78. le la sur word5", false, "fr");
           //console.log(words);
           assert(words.length === 5);
 
@@ -46,7 +46,7 @@ describe("Natural Content", function() {
         });
 
         it("term frequency", function(){
-            var info = natural.getTf(natural.getWords(documents[0]));
+            var info = natural.getTf(natural.getWords(documents[0], false, "fr"));
             //console.log(info);
             assert(info.max === 5);
             assert(info.count.word1 === 5);
@@ -60,18 +60,12 @@ describe("Natural Content", function() {
 
         it("tf.idf for a set of document ", function(){
 
-            var info = natural.getTfIdfs(documents, 1, false);
-            //console.log(info);
-            //console.log(info.stats.words['word7']);
+            var info = natural.getTfIdfs(documents, 1, false, "fr");
             console.log("Word,TF Avg,TF Min,TF Max,IDF Avg,TF.IDF Sum,TF.IDF Avg");
-            _.keys(info.stats.words).forEach(function(word) {
-              //console.log(">> ", info.stats.words[word]);
-              console.log(word + "," + info.stats.words[word].tfAvg + "," + info.stats.words[word].tfMin + "," + info.stats.words[word].tfMax + "," +
-                          info.stats.words[word].idfAvg  + ',' + info.stats.words[word].tfIdfSum + ',' + info.stats.words[word].tfIdfAvg);
-            });
+
+            var sorted = _.sortBy(Array.from(info.stats.words.values()), function(word) { return -word.tfIdfSum;});
+            console.log(sorted);
 
         });
-
-        //geTfId(document, nbrDocsByWords, nbrDocs, stats)
 
 });

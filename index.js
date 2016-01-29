@@ -1,6 +1,4 @@
-var _         = require('underscore');
-
-var stopwords = require("./lib/stopwords").stopwords;
+var _  = require('underscore');
 
 var WORD_SEPARATOR = " ";
 var STATEMENT_SEPARATOR = "##";
@@ -30,9 +28,10 @@ var EMPTY = "";
  *
  * @param Text or HTML content (String)
  * @param True if the stop words are to be present in the corpus
+ * @param the iso code for the target language
  * @return an array of words (string)
  */
-function getWords (text, withStopWords) {
+function getWords (text, withStopWords, language) {
 
   var words = text.replace(/[\n\r]/g, WORD_SEPARATOR)   // Convert end of line
                       .replace(/[\t]/g, EMPTY) // Remove Tabs
@@ -43,11 +42,13 @@ function getWords (text, withStopWords) {
                       .toLowerCase()
                       .split(WORD_SEPARATOR);
 
-  // Remove numbers, empty string & stopwords
+  // Remove empty string & numbers
   if (withStopWords) {
       return _.filter(words, function(word){return (word !== '') &&  isNaN(word); });
   }
+  // Remove empty string, numbers & stopwords
   else {
+      var stopwords = require("./lib/stopwords-" + language).stopwords;
       return _.filter(words, function(word){return (word !== '' && isNaN(word) && stopwords.indexOf(word) === -1); });
   }
 
@@ -106,12 +107,14 @@ function getTf(words, n, stats) {
             stats.nbrDocsByWords[word] = stats.nbrDocsByWords[word] ? ++stats.nbrDocsByWords[word] : 1;
 
             // Calculate sum & register the tf for min & max computation
-            if (stats.words[word] && stats.words[word].tfs) {
-              stats.words[word].tfs.push(tfs[word]);
-              stats.words[word].tfSum += tfs[word];
+            if (stats.words.has(word) && stats.words.get(word).tfs) {
+                var wordStat = stats.words.get(word);
+                wordStat.tfs.push(tfs[word]);
+                wordStat.tfSum += tfs[word];
             }
             else {
-              stats.words[word] = initWordStat(tfs[word]);
+                var newWordStat = initWordStat(word, tfs[word]);
+                stats.words.set(word, newWordStat);
             }
         }
 
@@ -139,27 +142,89 @@ function getTf(words, n, stats) {
  */
 function geTfIdf(document, nbrDocs, stats) {
 
-
     var tfIdf = {};
     _.keys(document.tfs).forEach(function(word) {
         var idf = Math.log(nbrDocs/stats.nbrDocsByWords[word]) + 1;
         tfIdf[word] = document.tfs[word] * idf;
 
-        if (stats.words[word] && stats.words[word].tfIdfs && stats.words[word].idfs) {
-          stats.words[word].tfIdfs.push(tfIdf[word]);
-          stats.words[word].tfIdfSum += tfIdf[word];
-          stats.words[word].idfs.push(idf);
-          stats.words[word].idfSum += idf;
+        if (stats.words.has(word) && stats.words.get(word).tfIdfs &&  stats.words.get(word).idfs) {
+            var wordStat = stats.words.get(word);
+
+            wordStat.tfIdfs.push(tfIdf[word]);
+            wordStat.tfIdfSum += tfIdf[word];
+            wordStat.idfs.push(idf);
+            wordStat.idfSum += idf;
         }
+
     });
 
     document.tfIdf = tfIdf;
     return document;
 }
 
-function initWordStat(tf) {
+
+/**
+ *  Get the TF.IDF for each words found in several documents
+ *
+ * @param an arrays of String matching to the document content. It could be Text or HTML
+ * @param ngrams cardinality (optional). Has to be > 0
+ * @param True if the stop words are to be present in the corpus
+ */
+function getTfIdfs(documents, n, withStopWords, language) {
+
+    var result = {};
+    var stats = createEmptyStat();
+
+    // Calculate the TF of each words for each docs
+    var tfs = _.map(documents, function(document){ return getTf(getWords(document, withStopWords, language), n, stats);});
+
+    // Calculate the tf.idf for each each docs & produce stats per word
+    var data = _.map(tfs, function(docTfs) { return geTfIdf(docTfs, documents.length, stats );});
+
+
+    // Calculate min, max, avg for tf, idf & tf.idf
+    for (var wordStat of stats.words.values()) {
+
+        wordStat.tfMin = _.min(wordStat.tfs);
+        wordStat.tfMax = _.max(wordStat.tfs);
+        wordStat.tfAvg = wordStat.tfSum / stats.nbrDocsByWords[wordStat.word];
+
+        wordStat.idfMax = _.max(wordStat.idfs);
+        wordStat.idfAvg = wordStat.idfSum / stats.nbrDocsByWords[wordStat.word];
+
+        wordStat.tfIdfMin = _.min(wordStat.tfIdfs);
+        wordStat.tfIdfMax = _.max(wordStat.tfIdfs);
+        wordStat.tfIdfAvg = wordStat.tfIdfSum / stats.nbrDocsByWords[wordStat.word];
+
+    }
+
+    result.documents = data;
+    result.numberOfDocs = documents.length;
+    result.stats = stats;
+
+    return result;
+}
+
+/**
+ *
+ *  Create an empty stat data object
+ *
+ */
+function createEmptyStat() {
+     return {
+       nbrDocsByWords : {},
+       words : new Map()
+     };
+}
+
+/**
+ *  Create an new Stat object for one word
+ *
+ */
+function initWordStat(word, tf) {
 
     return {
+      word : word,
       tfSum : tf,
       tfs : [tf],
 
@@ -171,53 +236,6 @@ function initWordStat(tf) {
 
     };
 
-}
-
-/**
- *  Get the TF.IDF for each words found in several documents
- *
- * @param an arrays of String matching to the document content. It could be Text or HTML
- * @param ngrams cardinality (optional). Has to be > 0
- * @param True if the stop words are to be present in the corpus
- */
-function getTfIdfs(documents, n, withStopWords) {
-
-    var result = {};
-    var stats = createEmptyStat();
-
-    // Calculate the TF of each words for each docs
-    var tfs = _.map(documents, function(document){ return getTf(getWords(document, withStopWords), n, stats);});
-
-    // Calculate the tf.idf for each each docs & produce stats per word
-    var data = _.map(tfs, function(docTfs) { return geTfIdf(docTfs, documents.length, stats );});
-
-    // Calculate min, max, avg for tf, idf & tf.idf
-    stats.words = _.mapObject(stats.words, function(word, key){
-        word.tfMin = _.min(word.tfs);
-        word.tfMax = _.max(word.tfs);
-        word.tfAvg = word.tfSum / stats.nbrDocsByWords[key];
-
-        word.idfMax = _.max(word.idfs);
-        word.idfAvg = word.idfSum / stats.nbrDocsByWords[key];
-
-        word.tfIdfMin = _.min(word.tfIdfs);
-        word.tfIdfMax = _.max(word.tfIdfs);
-        word.tfIdfAvg = word.tfIdfSum / stats.nbrDocsByWords[key];
-        return word;
-    });
-
-    result.documents = data;
-    result.numberOfDocs = documents.length;
-    result.stats = stats;
-
-    return result;
-}
-
-function createEmptyStat() {
-     return {
-       nbrDocsByWords : {},
-       words : []
-     };
 }
 
 exports.getStatements = getStatements;
