@@ -38,6 +38,7 @@ function getWords (text, withStopWords, language) {
                       .replace(/&nbsp;/gi,'') // remove HTML entities, only non breaking space
                       .replace(/(<([^>]+)>)/ig,EMPTY)   // remove HTML tags
                       .replace(/[’«»'";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR)  // Remove punctuations
+                      .replace(/[\W_]+/g," ") // Remove non alphanumeric char
                       .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
                       .toLowerCase()
                       .split(WORD_SEPARATOR);

@@ -17,7 +17,9 @@ describe("Natural Content", function() {
 
 
         it('Words', function() {
-          var words = natural.getWords("word1 word2 word3 word4. le la sur word5", true);
+          // Non alphanumeric are ignored
+          var words = natural.getWords("word1 word2 word3 word4. le la sur word5 & @' $ < >", true);
+          //console.log("words", words);
           assert(words.length === 8);
 
           words = natural.getWords("word1 word2 word3 word4. le la sur word5", false, "fr");
