@@ -15,20 +15,35 @@ describe("Natural Content", function() {
 
         });
 
+        it('Special caracters', function(){
+            var text = "ceci est un texte en français ! sans caractères spéciaux !§($€) # 123 avant-hier";
+            var result = natural.removeSpecials(text);
+            //console.log(result);
+            assert( result === 'ceci est un texte en français  sans caractères spéciaux    avanthier');
+        });
+
+        it('diacritics', function(){
+            var text = "ceci est un texte en français ! sans diacritiques çàoözęùô";
+            var result = natural.removeDiacritics(text);
+            assert(result === 'ceci est un texte en francais ! sans diacritiques caoozeuo');
+        });
 
         it('Words', function() {
-          // Non alphanumeric are ignored
-          var words = natural.getWords("word1 word2 word3 word4. le la sur word5 & @' $ < >", true);
-          //console.log("words", words);
-          assert(words.length === 8);
 
-          words = natural.getWords("word1 word2 word3 word4. le la sur word5", false, "fr");
+          var words = natural.getWords("word1 word2 word3 word4. le la sur word5, ça été bientôt & @' $ 123", true);
+          assert(words.length === 15);
+
+          words = natural.getWords(natural.removeSpecials("word1 word2 word3 word4. le la sur word5, ça été bientôt & @' $ 123"), true);
+          //console.log("words", words);
+          assert(words.length === 11);
+
+          words = natural.getWords("word1 word2 word3 word4. le la sur word5 bientôt", false, "fr");
           //console.log("words", words);
           assert(words.length === 5);
 
           words = natural.getWords("word1 word2 word3 1234 word4 156,78. le la sur word5", false, "fr");
           //console.log(words);
-          assert(words.length === 5);
+          assert(words.length === 8);
 
         });
 

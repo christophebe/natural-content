@@ -1,7 +1,7 @@
 {
   "name": "natural-content",
-  "version": "1.0.7",
-  "description": "A set of natural functions like tf.idf, extract words & n-grams, ... (experimental project)",
+  "version": "1.0.8",
+  "description": "A set of natural functions like tf.idf, extract words & n-grams, remove diacritics, ... (experimental project)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

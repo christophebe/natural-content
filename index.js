@@ -1,4 +1,5 @@
-var _  = require('underscore');
+var _          = require('underscore');
+var diacritics = require('./lib/diacritics.js');
 
 var WORD_SEPARATOR = " ";
 var STATEMENT_SEPARATOR = "##";
@@ -24,7 +25,39 @@ var EMPTY = "";
 }
 
 /**
- * Get all words
+ *  Remove all special caracters, symbols & digits
+ *
+ * @param a text as a String
+ * @return The text without special caracters
+ */
+function removeSpecials(text) {
+    var lower = text.toLowerCase();
+    var upper = text.toUpperCase();
+
+    var resut = "";
+    for(var i=0; i<lower.length; ++i) {
+
+        if(lower[i] !== upper[i] || lower[i].trim() === ''){
+          resut += text[i];
+        }
+    }
+    return resut;
+}
+
+/**
+ *  Remove all diacritics from a text
+ *
+ *
+ * @param a text as a String
+ * @return the text without diacritics
+ */
+function removeDiacritics(text) {
+  return diacritics.remove(text);
+}
+
+/**
+ * Get all words from a Text
+ * It removes diacritics & non alphanumeric caracters
  *
  * @param Text or HTML content (String)
  * @param True if the stop words are to be present in the corpus
@@ -38,19 +71,19 @@ function getWords (text, withStopWords, language) {
                       .replace(/&nbsp;/gi,'') // remove HTML entities, only non breaking space
                       .replace(/(<([^>]+)>)/ig,EMPTY)   // remove HTML tags
                       .replace(/[’«»'";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR)  // Remove punctuations
-                      .replace(/[\W_]+/g," ") // Remove non alphanumeric char
                       .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
                       .toLowerCase()
                       .split(WORD_SEPARATOR);
 
-  // Remove empty string & numbers
+
+  // Remove empty string
   if (withStopWords) {
-      return _.filter(words, function(word){return (word !== '') &&  isNaN(word); });
+      return _.filter(words, function(word){return (word !== '') ; });
   }
-  // Remove empty string, numbers & stopwords
+  // Remove empty string & stopwords
   else {
       var stopwords = require("./lib/stopwords-" + language).stopwords;
-      return _.filter(words, function(word){return (word !== '' && isNaN(word) && stopwords.indexOf(word) === -1); });
+      return _.filter(words, function(word){return (word !== ''  && stopwords.indexOf(removeDiacritics(word)) === -1); });
   }
 
 }
@@ -231,6 +264,8 @@ function initWordStat(word,  tf) {
 }
 
 exports.getStatements = getStatements;
+exports.removeSpecials = removeSpecials;
+exports.removeDiacritics = removeDiacritics;
 exports.getWords = getWords;
 exports.getNgrams = getNgrams;
 exports.getTf = getTf;
