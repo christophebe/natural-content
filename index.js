@@ -14,9 +14,9 @@ var EMPTY = "";
  */
  function getStatements (text) {
   return text.replace(/[\n\r]/g, WORD_SEPARATOR)   // Convert end of line
-                      .replace(/[\t]/g, EMPTY) // Remove Tabs
-                      .replace(/&nbsp;/gi,'')// remove HTML entities, only non breaking space
-                      .replace(/(<([^>]+)>)/ig,EMPTY)   // remove HTML tags
+                      .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+                      .replace(/&nbsp;/gi,WORD_SEPARATOR)// remove HTML entities, only non breaking space
+                      .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR)   // remove HTML tags
                       .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
                       .replace(/[.]/g, "." + STATEMENT_SEPARATOR)
                       .replace(/[!]/g, "!" + STATEMENT_SEPARATOR)
@@ -31,17 +31,27 @@ var EMPTY = "";
  * @return The text without special caracters
  */
 function removeSpecials(text) {
-    var lower = text.toLowerCase();
-    var upper = text.toUpperCase();
+  var cleanText = text.replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+                      .replace(/[\n\r]/g, WORD_SEPARATOR)
+                      .replace(/&nbsp;/gi,WORD_SEPARATOR)// remove HTML entities, only non breaking space
+                      .replace(/(<([^>]+)>)/ig,WORD_SEPARATOR)  // remove HTML tags
+                      .replace(/[|&’«»'"\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR);
 
-    var resut = "";
+
+    var lower = cleanText.toLowerCase();
+    var upper = cleanText.toUpperCase();
+
+    var result = "";
     for(var i=0; i<lower.length; ++i) {
 
         if(lower[i] !== upper[i] || lower[i].trim() === ''){
-          resut += text[i];
+          result += cleanText[i];
         }
     }
-    return resut;
+
+
+    result = result.replace(/\s+/g, WORD_SEPARATOR);  // remove multiple spaces
+    return result;
 }
 
 /**
@@ -67,11 +77,11 @@ function removeDiacritics(text) {
 function getWords (text, withStopWords, language) {
 
   var words = text.replace(/[\n\r]/g, WORD_SEPARATOR)   // Convert end of line
-                      .replace(/[\t]/g, EMPTY) // Remove Tabs
-                      .replace(/&nbsp;/gi,'') // remove HTML entities, only non breaking space
-                      .replace(/(<([^>]+)>)/ig,EMPTY)   // remove HTML tags
-                      .replace(/[’«»'";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR)  // Remove punctuations
-                      .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
+                      .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+                      .replace(/&nbsp;/gi,WORD_SEPARATOR) // remove HTML entities, only non breaking space
+                      .replace(/(<([^>]+)>)/ig,WORD_SEPARATOR)   // remove HTML tags
+                      .replace(/['’«»";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR)  // Remove punctuations
+                      .replace(/\s+/g, WORD_SEPARATOR) // remove multiple spaces
                       .toLowerCase()
                       .split(WORD_SEPARATOR);
 
