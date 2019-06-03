@@ -1,9 +1,9 @@
 
+const _ = require('underscore');
 const diacritics = require('./lib/diacritics.js');
 
 const WORD_SEPARATOR = ' ';
 const STATEMENT_SEPARATOR = '##';
-const EMPTY = '';
 
 /**
   * getStatements - Get all statements from a text
@@ -93,14 +93,14 @@ function getWords(text, withStopWords, language) {
 
   // Remove empty string
   if (withStopWords) {
-    return _.filter(words, (word) => word !== '');
+    return words.filter((word) => word !== '');
   }
 
   // Remove empty string & stopwords
 
   const { stopwords } = require(`./lib/stopwords-${ language }`);
 
-  return _.filter(words, (word) => word !== '' && stopwords.indexOf(removeDiacritics(word)) === -1);
+  return words.filter((word) => word !== '' && stopwords.indexOf(removeDiacritics(word)) === -1);
 }
 
 /**

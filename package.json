@@ -1,6 +1,6 @@
 {
   "name": "natural-content",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A set of natural functions like tf.idf, extract words & n-grams, remove diacritics, ... (experimental project)",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,9 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "underscore": "^1.9.1"
+  },
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-adidas-es8": "^1.1.0",
