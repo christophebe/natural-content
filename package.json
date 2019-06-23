@@ -8,7 +8,9 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "underscore": "^1.9.1"
+  },
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-adidas-es8": "^1.1.0",
