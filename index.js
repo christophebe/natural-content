@@ -18,6 +18,7 @@ function getStatements(text) {
                       .replace(/[.]/g, `.${ STATEMENT_SEPARATOR }`)
                       .replace(/[!]/g, `!${ STATEMENT_SEPARATOR }`)
                       .replace(/[?]/g, `?${ STATEMENT_SEPARATOR }`)
+                      .replace(/[...]/g, `.${ STATEMENT_SEPARATOR }`)
                       .split(STATEMENT_SEPARATOR);
 }
 
