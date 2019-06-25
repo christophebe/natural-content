@@ -15,9 +15,12 @@ describe('Natural Content', () => {
   ];
 
   it('Statements', () => {
-    const stats = natural.getStatements('word1 word2 word3 word4 :word5 word6. word7 word1, word8 word9 word10 word11 word6. word1 word12 word13');
+    const stats = natural.getStatements('word1 word2 word3 word4 :word5 word6. word7 word1, word8 word9 word10 word11 word6. Question? Word1 word12 word13!...End text.');
 
-    assert(stats.length === 3);
+    // console.log(stats);
+    assert(stats.length === 5);
+
+    // console.log(natural.getStatements(txt));
   });
 
   it('Special caracters', () => {

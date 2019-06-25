@@ -4,6 +4,16 @@ const WORD_SEPARATOR = ' ';
 const STATEMENT_SEPARATOR = '##';
 
 /**
+ * isFirstCharUpperCase - Check if the first letter of a statement is on uppercase
+ *
+ * @param  {string} statement the statement
+ * @returns {boolean}         true if the letter is upper case
+ */
+function isFirstCharUpperCase(statement) {
+  return /^[A-Z]/.test(statement);
+}
+
+/**
   * getStatements - Get all statements from a text
   *
   * @param  {string} text the text from which we want to extract the statements
@@ -15,11 +25,21 @@ function getStatements(text) {
                       .replace(/&nbsp;/gi, WORD_SEPARATOR)// remove HTML entities, only non breaking space
                       .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
                       .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
+                      .replace('...', STATEMENT_SEPARATOR)
+                      .replace(/[.]{3}/g, `.${ STATEMENT_SEPARATOR }`)
                       .replace(/[.]/g, `.${ STATEMENT_SEPARATOR }`)
                       .replace(/[!]/g, `!${ STATEMENT_SEPARATOR }`)
                       .replace(/[?]/g, `?${ STATEMENT_SEPARATOR }`)
-                      .replace(/[...]/g, `.${ STATEMENT_SEPARATOR }`)
-                      .split(STATEMENT_SEPARATOR);
+                      .split(STATEMENT_SEPARATOR)
+                      .reduce((result, t) => {
+                        if (t.trim() === '') {
+                          return result;
+                        }
+
+                        result.push(t.trim());
+
+                        return result;
+                      }, []);
 }
 
 /**
@@ -149,6 +169,8 @@ function getNgrams(words, n) {
 
   return result;
 }
+
+exports.isFirstCharUpperCase = isFirstCharUpperCase;
 
 exports.getStatements = getStatements;
 
