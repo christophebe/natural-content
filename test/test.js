@@ -24,7 +24,7 @@ describe('Natural Content', () => {
   });
 
   it('top keywords', () => {
-    const stats = natural.getTopKeywords([ 'word1 word2 word3 word4 word1 word6 word1 word2 word2 word1 word2 word2 word2 word2' ], 2);
+    const stats = natural.getTopKeywords([ 'word1 du word2 du word3 du word4 word1 du word6 du word1 du word2 du word2 du word1 word2 word2 word2 word2' ], 2);
 
     assert(stats.length === 2);
     assert(stats[0] === 'word2');

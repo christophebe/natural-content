@@ -119,7 +119,7 @@ function removeDiacritics(text) {
  * @param  {string} language      language code (fr, en, ...)
  * @returns {string}              an array of words
  */
-function getWords(text, withStopWords, language) {
+function getWords(text, withStopWords = false, language = 'fr') {
   const words = text.replace(/[\n\r]/g, WORD_SEPARATOR) // Convert end of line
                       .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
                       .replace(/&nbsp;/gi, WORD_SEPARATOR) // remove HTML entities, only non breaking space
@@ -179,12 +179,12 @@ function getNgrams(words, n) {
  * @param  {number} nbrKeywords The number of keywords to return
  * @returns {Arrays}             The list of keywords
  */
-function getTopKeywords(documents, nbrKeywords) {
+function getTopKeywords(documents, nbrKeywords, language = 'fr') {
   PorterStemmerFr.attach();
 
   const tfidf = new TfIdf();
 
-  documents.forEach((d) => tfidf.addDocument(d.tokenizeAndStem()));
+  documents.forEach((d) => tfidf.addDocument(getWords(d, false, language)));
 
   // Get the 2 first main terms from the stems
   const terms = tfidf.listTerms(0).slice(0, nbrKeywords).map((token) => token.term);
