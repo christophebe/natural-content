@@ -1,3 +1,4 @@
+const { PorterStemmerFr, TfIdf, AggressiveTokenizerFr } = require('natural');
 const diacritics = require('./lib/diacritics.js');
 
 const WORD_SEPARATOR = ' ';
@@ -170,6 +171,40 @@ function getNgrams(words, n) {
   return result;
 }
 
+/**
+ * getTopKeywords - Return a list of the main keywords found in a set of documents
+ * based on TfIdf
+ *
+ * @param  {Arrays} documents   The list of the documents
+ * @param  {number} nbrKeywords The number of keywords to return
+ * @returns {Arrays}             The list of keywords
+ */
+function getTopKeywords(documents, nbrKeywords) {
+  PorterStemmerFr.attach();
+
+  const tfidf = new TfIdf();
+
+  documents.forEach((d) => tfidf.addDocument(d.tokenizeAndStem()));
+
+  // Get the 2 first main terms from the stems
+  const terms = tfidf.listTerms(0).slice(0, nbrKeywords).map((token) => token.term);
+
+  const tokenizer = new AggressiveTokenizerFr();
+  const tokens = tokenizer.tokenize(documents.join('\n'));
+
+  return terms.map((t) => findword(t, tokens));
+}
+
+function findword(stem, tokens) {
+  for (const token of tokens) {
+    if (token.includes(stem)) {
+      return token;
+    }
+  }
+
+  return stem;
+}
+
 exports.isFirstCharUpperCase = isFirstCharUpperCase;
 
 exports.getStatements = getStatements;
@@ -183,3 +218,5 @@ exports.removeLineBreaks = removeLineBreaks;
 exports.getWords = getWords;
 
 exports.getNgrams = getNgrams;
+
+exports.getTopKeywords = getTopKeywords;

@@ -23,6 +23,15 @@ describe('Natural Content', () => {
     // console.log(natural.getStatements(txt));
   });
 
+  it('top keywords', () => {
+    const stats = natural.getTopKeywords([ 'word1 word2 word3 word4 word1 word6 word1 word2 word2 word1 word2 word2 word2 word2' ], 2);
+
+    assert(stats.length === 2);
+    assert(stats[0] === 'word2');
+
+    // console.log(natural.getStatements(txt));
+  });
+
   it('Special caracters', () => {
     const text = 'ceci est un texte en français ! sans caractères spéciaux !§($€) # 123 avant-hier';
     const result = natural.removeSpecials(text);
