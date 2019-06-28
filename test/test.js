@@ -39,6 +39,12 @@ describe('Natural Content', () => {
     assert(result === 'ceci est un texte en français sans caractères spéciaux avant hier');
   });
 
+  it('Line Break, tabs and spaces', () => {
+    const text = 'Ceci est un texte en français ! \t sans caractères spéciaux ! \n L\'autre        texte\n\r';
+    const result = natural.removeLineBreakTabs(text);
+
+    assert(result === 'Ceci est un texte en français ! sans caractères spéciaux ! L\'autre texte');
+  });
   it('apostrophe', () => {
     const text = 'ceci est un texte en français. l\'été sera chaud. Les conditions d\'utilisation de l\'objet';
 

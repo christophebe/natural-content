@@ -78,17 +78,21 @@ function removeSpecials(text) {
 }
 
 /**
- * removeLineBreaks - Remove line breaks in a text
+ * removeLineBreaks - Remove line breaks & tabs in a text
  *
  * @param  {type} text the text
- * @returns {type}     the text without line breaks
+ * @returns {type}     the text without line breaks and tabs
  */
-function removeLineBreaks(text) {
+function removeLineBreakTabs(text) {
   if (!text) {
     return '';
   }
 
-  return text.replace(/(\r\n|\n|\r)/gm, '').trim();
+  return text.replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+             .replace(/[\n\r]/g, WORD_SEPARATOR)
+             .replace(/[\n]/g, WORD_SEPARATOR)
+             .replace(/\s+/g, WORD_SEPARATOR)
+             .trim();
 }
 
 /**
@@ -177,6 +181,7 @@ function getNgrams(words, n) {
  *
  * @param  {Arrays} documents   The list of the documents
  * @param  {number} nbrKeywords The number of keywords to return
+ * @param  {number} language The language to use for finding the stopwords
  * @returns {Arrays}             The list of keywords
  */
 function getTopKeywords(documents, nbrKeywords, language = 'fr') {
@@ -213,7 +218,7 @@ exports.removeSpecials = removeSpecials;
 
 exports.removeDiacritics = removeDiacritics;
 
-exports.removeLineBreaks = removeLineBreaks;
+exports.removeLineBreakTabs = removeLineBreakTabs;
 
 exports.getWords = getWords;
 
