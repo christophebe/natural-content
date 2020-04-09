@@ -140,7 +140,7 @@ function getWords(text, withStopWords = false, language = 'fr') {
 
   // Remove empty string & stopwords
 
-  const { stopwords } = require(`./lib/stopwords-${ language }`);
+  const { stopwords } = require(`./lib/stopwords-${ language.toLowerCase() }`);
 
   return words.filter((word) => word !== '' && stopwords.indexOf(removeDiacritics(word)) === -1);
 }
