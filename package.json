@@ -1,6 +1,6 @@
 {
   "name": "natural-content",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A set of natural functions like extracting words & n-grams, remove diacritics, get top keywords, ... (experimental project)",
   "main": "index.js",
   "scripts": {
@@ -10,12 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "natural": "^0.6.3",
-    "underscore": "^1.9.1"
+    "underscore": "^1.10.2"
   },
   "devDependencies": {
-    "eslint": "^6.0.1",
-    "eslint-config-adidas-es8": "^1.1.0",
-    "eslint-plugin-import": "^2.18.0",
+    "eslint": "^6.8.0",
+    "eslint-config-adidas-es8": "^1.2.0",
+    "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-promise": "^4.2.1"
   }
 }
