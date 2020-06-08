@@ -15,6 +15,15 @@ function isFirstCharUpperCase(statement) {
 }
 
 /**
+ * Check if a statement contains an acronym which is a substring in uppercase
+ * @param  {string} statement the statement
+ * @returns {boolean} true if the statement contains an acronym
+ */
+function containsAcronym(statement) {
+  return /^(.*)([A-Z]{2,})/.test(statement);
+}
+
+/**
   * getStatements - Get all statements from a text
   *
   * @param  {string} text the text from which we want to extract the statements
@@ -22,25 +31,25 @@ function isFirstCharUpperCase(statement) {
   */
 function getStatements(text) {
   return text.replace(/[\n\r]/g, WORD_SEPARATOR) // Convert end of line
-                      .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
-                      .replace(/&nbsp;/gi, WORD_SEPARATOR)// remove HTML entities, only non breaking space
-                      .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
-                      .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
-                      .replace('...', STATEMENT_SEPARATOR)
-                      .replace(/[.]{3}/g, `.${ STATEMENT_SEPARATOR }`)
-                      .replace(/[.]/g, `.${ STATEMENT_SEPARATOR }`)
-                      .replace(/[!]/g, `!${ STATEMENT_SEPARATOR }`)
-                      .replace(/[?]/g, `?${ STATEMENT_SEPARATOR }`)
-                      .split(STATEMENT_SEPARATOR)
-                      .reduce((result, t) => {
-                        if (t.trim() === '') {
-                          return result;
-                        }
+    .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+    .replace(/&nbsp;/gi, WORD_SEPARATOR)// remove HTML entities, only non breaking space
+    .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
+    .replace(/  +/g, WORD_SEPARATOR) // remove multiple spaces
+    .replace('...', STATEMENT_SEPARATOR)
+    .replace(/[.]{3}/g, `.${STATEMENT_SEPARATOR}`)
+    .replace(/[.]/g, `.${STATEMENT_SEPARATOR}`)
+    .replace(/[!]/g, `!${STATEMENT_SEPARATOR}`)
+    .replace(/[?]/g, `?${STATEMENT_SEPARATOR}`)
+    .split(STATEMENT_SEPARATOR)
+    .reduce((result, t) => {
+      if (t.trim() === '') {
+        return result;
+      }
 
-                        result.push(t.trim());
+      result.push(t.trim());
 
-                        return result;
-                      }, []);
+      return result;
+    }, []);
 }
 
 /**
@@ -55,10 +64,10 @@ function removeSpecials(text) {
   }
 
   const cleanText = text.replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
-                      .replace(/[\n\r]/g, WORD_SEPARATOR)
-                      .replace(/&nbsp;/gi, WORD_SEPARATOR)// remove HTML entities, only non breaking space
-                      .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
-                      .replace(/[|&’«»'"\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR);
+    .replace(/[\n\r]/g, WORD_SEPARATOR)
+    .replace(/&nbsp;/gi, WORD_SEPARATOR)// remove HTML entities, only non breaking space
+    .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
+    .replace(/[|&’«»'"\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR);
 
   const lower = cleanText.toLowerCase();
   const upper = cleanText.toUpperCase();
@@ -89,10 +98,10 @@ function removeLineBreakTabs(text) {
   }
 
   return text.replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
-             .replace(/[\n\r]/g, WORD_SEPARATOR)
-             .replace(/[\n]/g, WORD_SEPARATOR)
-             .replace(/\s+/g, WORD_SEPARATOR)
-             .trim();
+    .replace(/[\n\r]/g, WORD_SEPARATOR)
+    .replace(/[\n]/g, WORD_SEPARATOR)
+    .replace(/\s+/g, WORD_SEPARATOR)
+    .trim();
 }
 
 /**
@@ -125,13 +134,13 @@ function removeDiacritics(text) {
  */
 function getWords(text, withStopWords = false, language = 'fr') {
   const words = text.replace(/[\n\r]/g, WORD_SEPARATOR) // Convert end of line
-                      .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
-                      .replace(/&nbsp;/gi, WORD_SEPARATOR) // remove HTML entities, only non breaking space
-                      .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
-                      .replace(/['’«»";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR) // Remove punctuations
-                      .replace(/\s+/g, WORD_SEPARATOR) // remove multiple spaces
-                      .toLowerCase()
-                      .split(WORD_SEPARATOR);
+    .replace(/[\t]/g, WORD_SEPARATOR) // Remove Tabs
+    .replace(/&nbsp;/gi, WORD_SEPARATOR) // remove HTML entities, only non breaking space
+    .replace(/(<([^>]+)>)/ig, WORD_SEPARATOR) // remove HTML tags
+    .replace(/['’«»";:,.\/(\/)\/!\/?\\-]/g, WORD_SEPARATOR) // Remove punctuations
+    .replace(/\s+/g, WORD_SEPARATOR) // remove multiple spaces
+    .toLowerCase()
+    .split(WORD_SEPARATOR);
 
   // Remove empty string
   if (withStopWords) {
@@ -140,7 +149,7 @@ function getWords(text, withStopWords = false, language = 'fr') {
 
   // Remove empty string & stopwords
 
-  const { stopwords } = require(`./lib/stopwords-${ language.toLowerCase() }`);
+  const { stopwords } = require(`./lib/stopwords-${language.toLowerCase()}`);
 
   return words.filter((word) => word !== '' && stopwords.indexOf(removeDiacritics(word)) === -1);
 }
@@ -169,7 +178,7 @@ function getNgrams(words, n) {
     const slice = words.slice(i, i + n);
 
     // Convert the ngram array into a ngram string and add it in the result list
-    result.push(slice.reduce((memo, word) => memo ? `${ memo } ${ word }` : word));
+    result.push(slice.reduce((memo, word) => memo ? `${memo} ${word}` : word));
   }
 
   return result;
@@ -211,6 +220,8 @@ function findword(stem, tokens) {
 }
 
 exports.isFirstCharUpperCase = isFirstCharUpperCase;
+
+exports.containsAcronym = containsAcronym;
 
 exports.getStatements = getStatements;
 

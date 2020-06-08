@@ -20,7 +20,8 @@ describe('Natural Content', () => {
     // console.log(stats);
     assert(stats.length === 5);
 
-    // console.log(natural.getStatements(txt));
+    assert(natural.containsAcronym('this is mister LOL'));
+    assert(!natural.containsAcronym('this is mister John Smith'));
   });
 
   it('top keywords', () => {

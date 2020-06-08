@@ -1,6 +1,6 @@
 {
   "name": "natural-content",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A set of natural functions like extracting words & n-grams, remove diacritics, get top keywords, ... (experimental project)",
   "main": "index.js",
   "scripts": {
